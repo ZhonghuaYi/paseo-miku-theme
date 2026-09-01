@@ -13,7 +13,15 @@
 > 这是非官方粉丝作品，与 Crypton Future Media, Inc. 无关联，也未获得其背书。
 > 初音未来及相关标识的权利归各自权利人所有。
 
-## 预览
+## 实际界面截图
+
+以下截图来自 Paseo Desktop，并已启用连续对话壁纸与磨砂 composer：
+
+| Paseo 中的 Miku Future Light | Paseo 中的 Miku Future Dark |
+| --- | --- |
+| ![Paseo 中的 Miku Future Light 主题](./screenshot-light.png) | ![Paseo 中的 Miku Future Dark 主题](./screenshot-dark.png) |
+
+## 原始壁纸
 
 | Miku Future Light | Miku Future Dark |
 | --- | --- |

@@ -15,7 +15,16 @@ and carefully scoped frosted-glass surfaces.
 > Crypton Future Media, Inc. Hatsune Miku and related marks belong to their
 > respective owners.
 
-## Preview
+## In-app screenshots
+
+Captured in Paseo Desktop with the continuous chat wallpaper and frosted composer
+enabled:
+
+| Miku Future Light in Paseo | Miku Future Dark in Paseo |
+| --- | --- |
+| ![Miku Future Light theme in Paseo](./screenshot-light.png) | ![Miku Future Dark theme in Paseo](./screenshot-dark.png) |
+
+## Original wallpapers
 
 | Miku Future Light | Miku Future Dark |
 | --- | --- |

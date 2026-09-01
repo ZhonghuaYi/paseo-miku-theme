@@ -186,6 +186,35 @@ html[${ROOT_ATTRIBUTE}="dark"] [${CHAT_SURFACE_ATTRIBUTE}] {
     opacity: 0.14;
     mix-blend-mode: screen;
   }
+
+  /* xterm paints an opaque WebGL/canvas surface, so making its surrounding
+   * div transparent cannot reveal a wallpaper. A restrained, non-interactive
+   * image layer keeps terminal glyphs and ANSI colors fully opaque. */
+  html[${ROOT_ATTRIBUTE}] [data-testid="terminal-surface"] {
+    isolation: isolate;
+  }
+
+  html[${ROOT_ATTRIBUTE}] [data-testid="terminal-surface"]::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: 4;
+    pointer-events: none;
+    background-image: var(${IMAGE_PROPERTY});
+    background-position: center right;
+    background-repeat: no-repeat;
+    background-size: cover;
+  }
+
+  html[${ROOT_ATTRIBUTE}="light"] [data-testid="terminal-surface"]::after {
+    opacity: 0.18;
+    mix-blend-mode: multiply;
+  }
+
+  html[${ROOT_ATTRIBUTE}="dark"] [data-testid="terminal-surface"]::after {
+    opacity: 0.20;
+    mix-blend-mode: screen;
+  }
 }
 
 /* Compact layouts keep Paseo's original opaque surfaces. */
@@ -288,6 +317,50 @@ function markTransparentPath(
   }
 }
 
+function findWorkspaceContentSurface(
+  composer: HTMLElement,
+  workspacePane: HTMLElement,
+): HTMLElement {
+  const paneRect = workspacePane.getBoundingClientRect();
+  if (paneRect.width <= 0 || paneRect.height <= 0) return workspacePane;
+
+  // The active conversation paints its FileDropZone-sized content shell, not
+  // the outer workspace pane (which also includes the tab bar). Find the first
+  // similarly full-sized ancestor whose other branch owns the empty content.
+  const minimumWidth = paneRect.width * 0.7;
+  const minimumHeight = Math.max(
+    paneRect.height * 0.7,
+    paneRect.height - 96,
+  );
+  let branch: HTMLElement = composer;
+  let current = composer.parentElement;
+
+  while (current && current !== workspacePane) {
+    const rect = current.getBoundingClientRect();
+    const hasContentBranch = [...current.children].some((child) => {
+      if (!(child instanceof HTMLElement) || child === branch) return false;
+      const childRect = child.getBoundingClientRect();
+      return (
+        childRect.width >= rect.width * 0.45 &&
+        childRect.height >= Math.max(32, rect.height * 0.2)
+      );
+    });
+
+    if (
+      rect.width >= minimumWidth &&
+      rect.height >= minimumHeight &&
+      hasContentBranch
+    ) {
+      return current;
+    }
+
+    branch = current;
+    current = current.parentElement;
+  }
+
+  return workspacePane;
+}
+
 function decorateChatSurfaces(elements: Set<HTMLElement>): void {
   const root = document.getElementById("root");
   if (!root) return;
@@ -317,6 +390,27 @@ function decorateChatSurfaces(elements: Set<HTMLElement>): void {
       shell = shell.parentElement;
       chatDepth += 1;
     }
+  }
+
+  /* A newly opened Agent is a workspace draft until its first message is
+   * submitted, so it has a composer but no agent-chat-scroll yet. Paint its
+   * pane-sized content shell and clear only the composer's ancestor path.
+   * Restricting the fallback to workspace panes avoids changing the New
+   * Workspace screen and composers hosted in dialogs. */
+  for (const composer of root.querySelectorAll<HTMLElement>(
+    '[data-testid="message-input-root"]',
+  )) {
+    if (composer.closest(`[${CHAT_SURFACE_ATTRIBUTE}]`)) continue;
+
+    const workspacePane = composer.closest<HTMLElement>(
+      '[data-testid^="workspace-pane-"]',
+    );
+    if (!workspacePane) continue;
+
+    const surface = findWorkspaceContentSurface(composer, workspacePane);
+    surface.setAttribute(CHAT_SURFACE_ATTRIBUTE, "");
+    elements.add(surface);
+    markTransparentPath(composer, surface, elements);
   }
 }
 
@@ -438,6 +532,7 @@ export function installMikuBackground(
     observer.observe(root, {
       attributes: true,
       attributeFilter: ["class"],
+      childList: true,
       subtree: true,
     });
   }

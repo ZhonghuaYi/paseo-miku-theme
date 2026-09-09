@@ -32,20 +32,29 @@ enabled:
 
 ## Features
 
+> Palette note: official character material describes Miku's signature hair as
+> blue-green; there is no single official "Miku purple." This theme uses the
+> commonly sampled Miku-magenta accent `#E12885` for user-message borders.
+
 - Two complete Paseo color themes: **Miku Future Light** and **Miku Future Dark**.
 - Original lossless PNG artwork is embedded in the plugin. At runtime it is exposed
   through short Blob URLs, preserving every source byte without hitting Chromium's
   data-URL length limit.
 - The conversation history and composer share one continuous wallpaper.
 - Your message bubbles and the composer card use a restrained translucent glass
-  treatment with an `18px` backdrop blur; AI responses remain visually lightweight.
+  treatment with an `18px` backdrop blur. User bubbles carry a clearer Miku-magenta
+  border (`#E12885`) so they remain easy to scan; AI responses remain visually lightweight.
+- Fenced code blocks in chat use a separate translucent glass sheet with syntax
+  colors preserved and a soft readable edge.
 - Markdown preview and source-code views inherit the wallpaper with a uniform
   readability scrim.
+- The desktop workspace sidebar, workspace tab bar, and right explorer sidebar
+  use an image-backed translucent glass treatment with a `22px` backdrop blur.
 - Git diffs receive a subtle, non-interactive wallpaper texture that keeps code text
   clear.
 - No left-to-right gradient mask: the same scrim is applied across the full image.
-- Menus, settings, terminals, sidebars, and unrelated work surfaces retain Paseo's
-  original opaque materials.
+- Menus, settings, terminals, and unrelated work surfaces retain Paseo's original
+  materials.
 - Wallpaper enhancement automatically disables below `721px` and whenever a non-Miku
   theme is selected.
 

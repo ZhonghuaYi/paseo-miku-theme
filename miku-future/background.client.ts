@@ -11,6 +11,23 @@ const CLEANUP_PROPERTY = "__paseoMikuCleanup";
 const IMAGE_PROPERTY = "--paseo-miku-wallpaper-image";
 const CHAT_SURFACE_ATTRIBUTE = "data-paseo-miku-chat-surface";
 const CHAT_CLEAR_ATTRIBUTE = "data-paseo-miku-chat-clear";
+const WORKSPACE_SIDEBAR_ATTRIBUTE = "data-paseo-miku-workspace-sidebar";
+const RIGHT_SIDEBAR_ATTRIBUTE = "data-paseo-miku-right-sidebar";
+const WORKSPACE_TABS_ATTRIBUTE = "data-paseo-miku-workspace-tabs";
+// Miku has no canonical purple. Her official visual identity is blue-green;
+// this pink/magenta accent is sampled from the original character palette.
+const MIKU_MAGENTA_RGB = "225, 40, 133";
+
+const WORKSPACE_SIDEBAR_ANCHORS = [
+  '[data-testid="sidebar-project-list"]',
+  '[data-testid="sidebar-project-workspace-list-scroll"]',
+  '[data-testid="sidebar-status-list-scroll"]',
+  '[data-testid="sidebar-pinned-list"]',
+  '[data-testid="sidebar-global-new-workspace"]',
+  '[data-testid="sidebar-sessions"]',
+  '[data-testid="sidebar-search"]',
+  '[data-testid="left-sidebar-resize-handle"]',
+].join(", ");
 
 type WallpaperMode = "light" | "dark";
 type Rgba = readonly [red: number, green: number, blue: number, alpha: number];
@@ -66,8 +83,101 @@ html[${ROOT_ATTRIBUTE}="dark"] [${CHAT_SURFACE_ATTRIBUTE}] {
     background-image: none !important;
   }
 
+  /* Desktop chrome uses the same glass language as the chat. The left
+   * workspace list and the right explorer dock are marked at runtime because
+   * their outer React Native Web wrappers do not have stable class names.
+   * Each shell owns a faint copy of the wallpaper. Paseo's native sidebar
+   * surface is opaque, so backdrop-filter alone would otherwise have nothing
+   * textured to blur. */
+  html[${ROOT_ATTRIBUTE}] [${WORKSPACE_SIDEBAR_ATTRIBUTE}],
+  html[${ROOT_ATTRIBUTE}] [${WORKSPACE_SIDEBAR_ATTRIBUTE}] > div,
+  html[${ROOT_ATTRIBUTE}] [${RIGHT_SIDEBAR_ATTRIBUTE}],
+  html[${ROOT_ATTRIBUTE}] [${RIGHT_SIDEBAR_ATTRIBUTE}] > div {
+    -webkit-backdrop-filter: blur(22px) saturate(1.18);
+    backdrop-filter: blur(22px) saturate(1.18);
+    background-clip: padding-box !important;
+    background-color: inherit !important;
+    isolation: isolate;
+  }
+
+  html[${ROOT_ATTRIBUTE}="light"] [${WORKSPACE_SIDEBAR_ATTRIBUTE}],
+  html[${ROOT_ATTRIBUTE}="light"] [${RIGHT_SIDEBAR_ATTRIBUTE}] {
+    background-color: rgba(255, 255, 255, 0.28) !important;
+    background-image:
+      linear-gradient(rgba(247, 252, 251, 0.42), rgba(247, 252, 251, 0.42)),
+      var(${IMAGE_PROPERTY}) !important;
+    background-position: right center !important;
+    background-repeat: no-repeat !important;
+    background-size: cover !important;
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.78),
+      0 10px 32px rgba(49, 105, 101, 0.16);
+  }
+
+  html[${ROOT_ATTRIBUTE}="dark"] [${WORKSPACE_SIDEBAR_ATTRIBUTE}],
+  html[${ROOT_ATTRIBUTE}="dark"] [${RIGHT_SIDEBAR_ATTRIBUTE}] {
+    background-color: rgba(16, 24, 27, 0.30) !important;
+    background-image:
+      linear-gradient(rgba(16, 24, 27, 0.40), rgba(16, 24, 27, 0.40)),
+      var(${IMAGE_PROPERTY}) !important;
+    background-position: right center !important;
+    background-repeat: no-repeat !important;
+    background-size: cover !important;
+    box-shadow:
+      inset 0 1px 0 rgba(101, 222, 210, 0.11),
+      0 10px 32px rgba(0, 0, 0, 0.30);
+  }
+
+  html[${ROOT_ATTRIBUTE}="light"] [${WORKSPACE_SIDEBAR_ATTRIBUTE}] > div,
+  html[${ROOT_ATTRIBUTE}="light"] [${RIGHT_SIDEBAR_ATTRIBUTE}] > div {
+    background-color: rgba(255, 255, 255, 0.24) !important;
+  }
+
+  html[${ROOT_ATTRIBUTE}="dark"] [${WORKSPACE_SIDEBAR_ATTRIBUTE}] > div,
+  html[${ROOT_ATTRIBUTE}="dark"] [${RIGHT_SIDEBAR_ATTRIBUTE}] > div {
+    background-color: rgba(16, 24, 27, 0.28) !important;
+  }
+
+  html[${ROOT_ATTRIBUTE}="light"] [${WORKSPACE_SIDEBAR_ATTRIBUTE}] {
+    border-right: 1px solid rgba(43, 143, 138, 0.28) !important;
+  }
+
+  html[${ROOT_ATTRIBUTE}="dark"] [${WORKSPACE_SIDEBAR_ATTRIBUTE}] {
+    border-right: 1px solid rgba(101, 222, 210, 0.22) !important;
+  }
+
+  html[${ROOT_ATTRIBUTE}="light"] [${RIGHT_SIDEBAR_ATTRIBUTE}] {
+    border-left: 1px solid rgba(43, 143, 138, 0.28) !important;
+  }
+
+  html[${ROOT_ATTRIBUTE}="dark"] [${RIGHT_SIDEBAR_ATTRIBUTE}] {
+    border-left: 1px solid rgba(101, 222, 210, 0.22) !important;
+  }
+
+  /* The horizontal workspace tab bar gets a lighter sheet so the tab labels
+   * remain crisp while the area still reads as part of the glass chrome. */
+  html[${ROOT_ATTRIBUTE}] [${WORKSPACE_TABS_ATTRIBUTE}] {
+    -webkit-backdrop-filter: blur(18px) saturate(1.14);
+    backdrop-filter: blur(18px) saturate(1.14);
+    background-clip: padding-box !important;
+  }
+
+  html[${ROOT_ATTRIBUTE}="light"] [${WORKSPACE_TABS_ATTRIBUTE}] {
+    background-color: rgba(255, 255, 255, 0.42) !important;
+    border-bottom: 1px solid rgba(43, 143, 138, 0.22) !important;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.72);
+  }
+
+  html[${ROOT_ATTRIBUTE}="dark"] [${WORKSPACE_TABS_ATTRIBUTE}] {
+    background-color: rgba(18, 31, 34, 0.46) !important;
+    border-bottom: 1px solid rgba(101, 222, 210, 0.18) !important;
+    box-shadow: inset 0 1px 0 rgba(101, 222, 210, 0.09);
+  }
+
   /* User-authored history and the real composer card use the same restrained
-   * glass treatment. AI responses and the composer's outer layout stay clear. */
+   * glass treatment. AI responses and the composer's outer layout stay clear.
+   * Miku's standard palette has no official purple, so the message border
+   * uses her recognizable pink/magenta accent (#E12885). */
   html[${ROOT_ATTRIBUTE}] [data-testid="user-message"] > :first-child > :first-child,
   html[${ROOT_ATTRIBUTE}] [data-testid="message-input-root"] > div:has(
       [data-composer-input],
@@ -83,9 +193,12 @@ html[${ROOT_ATTRIBUTE}="dark"] [${CHAT_SURFACE_ATTRIBUTE}] {
   html[${ROOT_ATTRIBUTE}="light"]
     [data-testid="user-message"] > :first-child > :first-child {
     background-color: rgba(255, 255, 255, 0.52) !important;
-    border-color: rgba(43, 143, 138, 0.24) !important;
+    border-color: rgba(${MIKU_MAGENTA_RGB}, 0.86) !important;
+    border-width: 2px !important;
+    border-radius: 14px !important;
     box-shadow:
       inset 0 1px 0 rgba(255, 255, 255, 0.72),
+      0 0 0 1px rgba(${MIKU_MAGENTA_RGB}, 0.18),
       0 8px 28px rgba(49, 105, 101, 0.12);
   }
 
@@ -103,10 +216,13 @@ html[${ROOT_ATTRIBUTE}="dark"] [${CHAT_SURFACE_ATTRIBUTE}] {
 
   html[${ROOT_ATTRIBUTE}="dark"]
     [data-testid="user-message"] > :first-child > :first-child {
-    background-color: rgba(18, 31, 34, 0.46) !important;
-    border-color: rgba(101, 222, 210, 0.18) !important;
+    background-color: rgba(29, 23, 48, 0.50) !important;
+    border-color: rgba(255, 126, 190, 0.94) !important;
+    border-width: 2px !important;
+    border-radius: 14px !important;
     box-shadow:
-      inset 0 1px 0 rgba(101, 222, 210, 0.10),
+      inset 0 1px 0 rgba(255, 193, 221, 0.22),
+      0 0 0 1px rgba(255, 126, 190, 0.20),
       0 8px 28px rgba(0, 0, 0, 0.18);
   }
 
@@ -120,6 +236,41 @@ html[${ROOT_ATTRIBUTE}="dark"] [${CHAT_SURFACE_ATTRIBUTE}] {
     box-shadow:
       inset 0 1px 0 rgba(101, 222, 210, 0.12),
       0 10px 30px rgba(0, 0, 0, 0.22);
+  }
+
+  /* Fenced Markdown blocks in the chat keep their syntax colors, but the
+   * opaque surface becomes a translucent sheet over the continuous wallpaper.
+   * The data-pmono fallback also covers older Paseo builds without the newer
+   * markdown tag marker. */
+  html[${ROOT_ATTRIBUTE}] [data-testid="assistant-message"]
+    [data-paseo-markdown-tag="pre"],
+  html[${ROOT_ATTRIBUTE}] [data-testid="assistant-message"] div[data-pmono] {
+    -webkit-backdrop-filter: blur(16px) saturate(1.12);
+    backdrop-filter: blur(16px) saturate(1.12);
+    background-clip: padding-box !important;
+    border-style: solid !important;
+    border-width: 1px !important;
+    border-radius: 12px !important;
+  }
+
+  html[${ROOT_ATTRIBUTE}="light"] [data-testid="assistant-message"]
+    [data-paseo-markdown-tag="pre"],
+  html[${ROOT_ATTRIBUTE}="light"] [data-testid="assistant-message"] div[data-pmono] {
+    background-color: rgba(255, 255, 255, 0.34) !important;
+    border-color: rgba(43, 143, 138, 0.30) !important;
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.62),
+      0 8px 22px rgba(49, 105, 101, 0.10);
+  }
+
+  html[${ROOT_ATTRIBUTE}="dark"] [data-testid="assistant-message"]
+    [data-paseo-markdown-tag="pre"],
+  html[${ROOT_ATTRIBUTE}="dark"] [data-testid="assistant-message"] div[data-pmono] {
+    background-color: rgba(15, 25, 29, 0.46) !important;
+    border-color: rgba(101, 222, 210, 0.26) !important;
+    box-shadow:
+      inset 0 1px 0 rgba(101, 222, 210, 0.10),
+      0 8px 22px rgba(0, 0, 0, 0.24);
   }
 
   /* CodeMirror normally paints an opaque editor and gutter. Only those two
@@ -282,10 +433,13 @@ function detectMikuMode(): WallpaperMode | null {
   return darkScore > lightScore ? "dark" : "light";
 }
 
-function clearChatSurfaceDecorations(elements: Set<HTMLElement>): void {
+function clearDecorations(elements: Set<HTMLElement>): void {
   for (const element of elements) {
     element.removeAttribute(CHAT_SURFACE_ATTRIBUTE);
     element.removeAttribute(CHAT_CLEAR_ATTRIBUTE);
+    element.removeAttribute(WORKSPACE_SIDEBAR_ATTRIBUTE);
+    element.removeAttribute(RIGHT_SIDEBAR_ATTRIBUTE);
+    element.removeAttribute(WORKSPACE_TABS_ATTRIBUTE);
   }
   elements.clear();
 }
@@ -314,6 +468,61 @@ function markTransparentPath(
     current.setAttribute(CHAT_CLEAR_ATTRIBUTE, "");
     elements.add(current);
     current = current.parentElement;
+  }
+}
+
+function findWorkspaceSidebarSurface(anchor: HTMLElement): HTMLElement | null {
+  const viewportWidth = Math.max(1, window.innerWidth);
+  const viewportHeight = Math.max(1, window.innerHeight);
+  const maximumWidth = Math.min(520, viewportWidth * 0.46);
+  const minimumHeight = Math.max(360, viewportHeight * 0.65);
+  let current: HTMLElement | null = anchor;
+  let surface: HTMLElement | null = null;
+
+  while (current && current !== document.body) {
+    const rect = current.getBoundingClientRect();
+    const isSidebarSized =
+      rect.width >= 150 && rect.width <= maximumWidth && rect.left <= viewportWidth * 0.2;
+    const isTallEnough = rect.height >= minimumHeight;
+
+    if (isSidebarSized && isTallEnough) {
+      surface = current;
+    }
+
+    // Once the ancestor becomes the full app row/root, continuing would mark
+    // the entire workspace instead of the left workspace bar.
+    if (rect.width > viewportWidth * 0.6) {
+      break;
+    }
+    current = current.parentElement;
+  }
+
+  return surface;
+}
+
+function decorateWorkspaceChrome(elements: Set<HTMLElement>): void {
+  const root = document.getElementById("root");
+  if (!root) return;
+
+  const workspaceSidebarAnchor = root.querySelector<HTMLElement>(WORKSPACE_SIDEBAR_ANCHORS);
+  const workspaceSidebar = workspaceSidebarAnchor
+    ? findWorkspaceSidebarSurface(workspaceSidebarAnchor)
+    : null;
+  if (workspaceSidebar) {
+    workspaceSidebar.setAttribute(WORKSPACE_SIDEBAR_ATTRIBUTE, "");
+    elements.add(workspaceSidebar);
+  }
+
+  for (const sidebar of root.querySelectorAll<HTMLElement>(
+    '[data-testid="workspace-explorer-sidebar"]',
+  )) {
+    sidebar.setAttribute(RIGHT_SIDEBAR_ATTRIBUTE, "");
+    elements.add(sidebar);
+  }
+
+  for (const tabs of root.querySelectorAll<HTMLElement>('[data-testid="workspace-tabs-row"]')) {
+    tabs.setAttribute(WORKSPACE_TABS_ATTRIBUTE, "");
+    elements.add(tabs);
   }
 }
 
@@ -510,10 +719,13 @@ export function installMikuBackground(
   const update = () => {
     timer = null;
     if (stopped) return;
-    clearChatSurfaceDecorations(decoratedElements);
+    clearDecorations(decoratedElements);
     const mode = detectMikuMode();
     applyMode(layer, mode, imageUrls);
-    if (mode !== null) decorateChatSurfaces(decoratedElements);
+    if (mode !== null) {
+      decorateChatSurfaces(decoratedElements);
+      decorateWorkspaceChrome(decoratedElements);
+    }
   };
   const scheduleUpdate = (delay = 80) => {
     if (timer !== null) window.clearTimeout(timer);
@@ -572,7 +784,7 @@ export function installMikuBackground(
     document.removeEventListener("keyup", handleKeyboardInteraction, true);
     document.documentElement.removeAttribute(ROOT_ATTRIBUTE);
     document.documentElement.style.removeProperty(IMAGE_PROPERTY);
-    clearChatSurfaceDecorations(decoratedElements);
+    clearDecorations(decoratedElements);
     imageUrls.revoke();
     style.remove();
     layer.remove();

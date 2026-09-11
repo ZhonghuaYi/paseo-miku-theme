@@ -32,6 +32,10 @@
 > 配色说明：官方资料将初音未来的标志性发色描述为蓝绿色，并没有统一的官方“初音紫”。本主题使用常见的初音洋红点缀 `#E12885` 来强调用户消息边框；它比通用紫色更贴近角色原始配色。
 
 - 提供两套完整 Paseo 配色：**Miku Future Light** 和 **Miku Future Dark**；
+- 每个工作区头部都有 **Miku** 菜单按钮，可一键开关壁纸并打开插件设置；
+- 可在 **Settings → Plugins → Miku Future** 中配置：壁纸开关、显示强度
+  （subtle / balanced / vivid）、消息强调色（初音洋红或青绿）与玻璃模糊强度；
+  设置按主机持久化，重启与插件重载后依然生效；
 - 插件内嵌原始无损 PNG，并在运行时生成短 `Blob URL`，既保留每一个源文件字节，
   又不会触发 Chromium 的 data URL 长度限制；
 - 对话历史与 composer 共用一张连续壁纸；
@@ -70,8 +74,8 @@ Paseo 官方 `addTheme` API 只接受颜色，不接受背景图片。因此，�
 
 ## 安装
 
-需要 Paseo `v0.5.0` 或更高版本。请先在 Paseo 中打开 **Settings → Plugins**，启用
-**Enable plugins**。
+需要 Paseo `v0.8.0` 或更高版本；本插件采用 v0.8 运行时入口格式，无法在旧版本上加载。
+请先在 Paseo 中打开 **Settings → Plugins**，启用 **Enable plugins**。
 
 随后克隆仓库并安装其中的插件目录：
 
@@ -98,10 +102,27 @@ paseo plugin reload miku-future
 
 可发布插件位于 [`miku-future/`](./miku-future)：
 
-- `index.ts` 定义两套 Paseo 官方配色主题；
-- `background.client.ts` 负责应用和清理 Web / Electron 壁纸增强；
-- `assets/` 只包含运行时实际使用的两张无损 PNG；
-- `background-data.client.ts` 由这两张 PNG 自动生成。
+- `index.client.ts` 是客户端入口：注册主题、设置界面和各工作区的壁纸头部按钮；
+- `index.server.ts` 是 daemon 入口：注册持久化设置文档；
+- `shared/preferences.ts` 定义该设置文档（壁纸、显示强度、强调色、模糊）
+  以及供 React 之外调用的 RPC 契约；
+- `client/colors.ts` 是调色板的唯一来源——主题、检测标记、色膜和强调色
+  全部由它派生；
+- `client/wallpaper-css.ts` 根据这些颜色和用户的样式选项构建增强样式表；
+- `client/background.ts` 负责应用、更新和清理 Web / Electron 壁纸增强；
+- `client/settings-screen.tsx` 是 Settings → Plugins 中的设置界面；
+- `client/background-data.ts` 由 `assets/` 中的 PNG 自动生成；
+- `client/dom.d.ts` 声明壁纸增强所依赖的最小 DOM 类型面；
+- `assets/` 只包含运行时实际使用的两张无损 PNG。
+
+修改源码后，请先安装开发依赖、通过类型检查和测试再重载插件：
+
+```bash
+cd miku-future
+npm install
+npm run typecheck
+npm test
+```
 
 更换任意 PNG 后，请重新生成客户端内嵌数据并重载插件：
 

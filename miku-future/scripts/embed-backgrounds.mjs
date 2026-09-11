@@ -28,4 +28,4 @@ const output = [
   ...exports,
   "",
 ].join("\n");
-await writeFile(resolve(pluginDirectory, "background-data.client.ts"), output, "utf8");
+await writeFile(resolve(pluginDirectory, "client/background-data.ts"), output, "utf8");

@@ -1,3 +1,6 @@
 {
-  "id": "miku-future"
+  "id": "miku-future",
+  "requirements": {
+    "paseo": ">=0.8.0"
+  }
 }
